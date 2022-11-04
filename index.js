@@ -32,8 +32,24 @@ function operate(operator, x, y) {
   else if(operator === '/') return divide(x,y)
 }
 
+function clearState() {
+  firstNumber = ""
+  secondNumber = ""
+  operator = ""
+  display.textContent = ""
+}
+
 function handleInput(e) {
   const x = e.target.textContent
+
+  // Handle errors
+  if(x === '0' && operator === '/') {
+    return display.textContent = 'Cannot divide by zero'
+  }
+  if(display.textContent === 'Cannot divide by zero') {
+    clearState()
+  }
+  
   // User inputted a number
   if(isNumber(x)) {
     operator ? secondNumber += x : firstNumber += x
@@ -43,13 +59,27 @@ function handleInput(e) {
   else {
     // We don't have an operator yet
     if(!operator) {
+      if(!firstNumber) {
+        if(x === '-') {
+          firstNumber += x
+          return display.textContent = x
+        }
+        return
+      }
       operator = x
       display.textContent += ` ${x} `
     }
-    // We already have an operator so do the calculation and save it to firstNumber
-    // Then store the latest operator and wipe the secondNumber
+    // We already have an operator
     else {
+      // Allow negative prefix after operator
+      if(!secondNumber && x === '-') {
+        secondNumber += x
+        return display.textContent += x
+      }
+
+      // Do the calculation and save it to firstNumber
       firstNumber = operate(operator, +firstNumber, +secondNumber)
+      // Then store the latest operator and wipe the secondNumber
       operator = x
       secondNumber = ""
       display.textContent = `${firstNumber} ${operator} `
@@ -58,6 +88,8 @@ function handleInput(e) {
 }
 
 function handleEquals(e) {
+  if(!secondNumber) return
+
   // Do the calculation and save it as firstNumber to allow the user to continue from the result
   firstNumber = operate(operator, +firstNumber, +secondNumber)
   operator = null
