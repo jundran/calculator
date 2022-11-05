@@ -6,11 +6,19 @@ const clear = document.querySelector('#clear')
 const backspace = document.querySelector('#backspace')
 const equals = document.querySelector('#equals')
 
-buttons.forEach(button => button.addEventListener('click', handleInput) )
 dot.onclick = handleDot
 clear.onclick = clearState
 backspace.onclick = handleBackspace
 equals.onclick = handleEquals
+buttons.forEach(button =>
+  button.addEventListener('click', e => handleInput(e.target.textContent)))
+
+// Keypress ignores shift but doesn't detect backspace or delete
+document.addEventListener('keydown', e => {
+  const input = getInputFromKeyCode(e)
+  console.log(input)
+  if(input) handleInput(input)
+})
 
 const add = (x, y) => x + y
 const subtract = (x, y) => x - y
@@ -44,8 +52,7 @@ function clearState() {
   display.textContent = ""
 }
 
-function handleInput(e) {
-  const x = e.target.textContent
+function handleInput(x) {
   if (display.textContent === 'Cannot divide by zero') clearState()
   if (isNumber(x)) processNumber(x)
   else processOperator(x)
@@ -54,9 +61,8 @@ function handleInput(e) {
     state.operator ? state.secondNumber += num : state.firstNumber += num
 
     const lastChar = display.textContent.charAt(display.textContent.length - 1)
-    isNumber(lastChar) || lastChar === '-' || lastChar === '.' ?
-      display.textContent += num :
-      display.textContent += ` ${num}`
+    if(isNumber(lastChar) || lastChar === '.' || lastChar === '-') display.textContent += num
+    else display.textContent += ` ${num} `
   }
 
   function processOperator(op) {
@@ -88,7 +94,7 @@ function handleInput(e) {
   }
 }
 
-function handleEquals(e) {
+function handleEquals() {
   if(!state.secondNumber || state.secondNumber === "-") return
   // Save result to first number in order to continue with further calculations
   state.firstNumber = operate(state.operator, +state.firstNumber, +state.secondNumber)
@@ -97,28 +103,50 @@ function handleEquals(e) {
   display.textContent = state.firstNumber
 }
 
-function handleBackspace(e) {
-  const x = e.target.textContent
+function handleBackspace() {
   let prop = "secondNumber"
   if(!state.operator) prop = "firstNumber"
   else if (state.firstNumber && !state.secondNumber) prop = "operator"
 
   state[prop] = "" + state[prop]
   state[prop] = state[prop].slice(0, state[prop].length - 1)
-  do {
-    display.textContent = display.textContent.slice(0, display.textContent.length - 1)
-    console.log(state)
-  } while (display.textContent.charAt(display.textContent.length - 1) === ' ')
+
+  display.textContent = display.textContent.trim()
+  display.textContent = display.textContent.slice(0, display.textContent.length - 1)
 }
 
 function handleDot() {
   let prop = "secondNumber"
   if(!state.operator) prop = "firstNumber"
   if(state[prop].includes('.')) return
-  
+
   let dot
   if(!state[prop]) dot = '0.'
   else dot = '.'
   state[prop] += dot
   display.textContent = display.textContent += dot
+}
+
+function getInputFromKeyCode(e) {
+  e.preventDefault() // prevent enter key from slecting number if in focus
+  const c = e.key
+  if(/^\d$/.test(c)) return c
+  else if(['+', '-', '*', '/', '\\'].includes(c)) return c
+  else if(c === '=' || e.code === 'Enter' || e.code === 'NumpadEnter') {
+    handleEquals()
+    return null
+  }
+  else if(c === '.') {
+    handleDot()
+    return null
+  }
+  else if(c === 'Backspace' || c === 'Delete') {
+    handleBackspace()
+    return null
+  }
+  else if(c === 'c' || c === 'C') {
+    clearState()
+    return null
+  }
+  else return null
 }
