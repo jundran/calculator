@@ -45,10 +45,12 @@ const state = {
 
 function operate(operator, x, y) {
   console.log(x, operator, y)
-  if(operator === '+') return add(x,y)
-  else if(operator === '-') return subtract(x,y)
-  else if(operator === '*') return multiply(x,y)
-  else if(operator === '/') return divide(x,y)
+  let answer
+  if(operator === '+') answer = add(x,y)
+  else if(operator === '-') answer = subtract(x,y)
+  else if(operator === '*') answer = multiply(x,y)
+  else if(operator === '/') answer = divide(x,y)
+  return Number.parseFloat(answer.toFixed(16))
 }
 
 function clearState() {
