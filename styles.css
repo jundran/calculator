@@ -32,6 +32,10 @@
     "dot zero clear divide equals";
 }
 
+.operator {
+  background-color: lightskyblue;
+}
+
 button {
   padding: 22px 0;
   font-weight: inherit;
