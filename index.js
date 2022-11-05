@@ -21,7 +21,6 @@ const subtract = (x, y) => x - y
 const multiply = (x, y) => x * y
 const divide = (x, y) => x / y
 const isNumber = x => !isNaN(x)
-const isOperator = x => isNaN(x)
 
 /* STATE VARIABLES */
 let operator
@@ -45,54 +44,58 @@ function clearState() {
 
 function handleInput(e) {
   const x = e.target.textContent
+  handleErrors(x)
+  if (isNumber(x)) processNumber(x)
+  else processOperator(x)
 
-  // Handle errors
-  if(x === '0' && operator === '/') {
-    return display.textContent = 'Cannot divide by zero'
+  function processNumber(num) {
+    operator ? secondNumber += num : firstNumber += num
+    display.textContent += num
   }
-  if(display.textContent === 'Cannot divide by zero') {
-    clearState()
-  }
-  
-  // User inputted a number
-  if(isNumber(x)) {
-    operator ? secondNumber += x : firstNumber += x
-    display.textContent += x
-  }
-  // User inputted an operator
-  else {
-    // We don't have an operator yet
+
+  function processOperator(op) {
+    // We don't have an operator saved yet
     if(!operator) {
-      if(!firstNumber) {
-        if(x === '-') {
-          firstNumber += x
-          return display.textContent = x
-        }
-        return
+      // Allow negative prefix before firstNumber
+      if(!firstNumber && x === '-') {
+        firstNumber = x
+        return display.textContent = x
       }
-      operator = x
-      display.textContent += ` ${x} `
+      else if(/[0-9]/.test(firstNumber) ) {
+        operator = x
+        display.textContent += ` ${x} `
+      }
     }
     // We already have an operator
     else {
-      // Allow negative prefix after operator
+      // Allow negative prefix before secondNumber
       if(!secondNumber && x === '-') {
-        secondNumber += x
+        secondNumber = x
         return display.textContent += x
       }
+      else if(/[0-9]/.test(secondNumber) ) {
+        // Do the calculation and save it to firstNumber
+        firstNumber = operate(operator, +firstNumber, +secondNumber)
+        // Then store the latest operator and wipe the secondNumber
+        operator = x
+        secondNumber = ""
+        display.textContent = `${firstNumber} ${operator} `
+      }
+    }
+  }
 
-      // Do the calculation and save it to firstNumber
-      firstNumber = operate(operator, +firstNumber, +secondNumber)
-      // Then store the latest operator and wipe the secondNumber
-      operator = x
-      secondNumber = ""
-      display.textContent = `${firstNumber} ${operator} `
+  function handleErrors(x) {
+    if (display.textContent === 'Cannot divide by zero') {
+      clearState()
+    }
+    else if (x === '0' && operator === '/') {
+      display.textContent = 'Cannot divide by zero'
     }
   }
 }
 
 function handleEquals(e) {
-  if(!secondNumber) return
+  if(!secondNumber || secondNumber === "-") return
 
   // Do the calculation and save it as firstNumber to allow the user to continue from the result
   firstNumber = operate(operator, +firstNumber, +secondNumber)
