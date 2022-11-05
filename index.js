@@ -53,7 +53,10 @@ function handleInput(e) {
 
   function processNumber(num) {
     state.operator ? state.secondNumber += num : state.firstNumber += num
-    display.textContent += num
+
+    isNumber(display.textContent.charAt(display.textContent.length - 1)) ?
+      display.textContent += num :
+      display.textContent += ` ${num}`
   }
 
   function processOperator(op) {
@@ -66,7 +69,7 @@ function handleInput(e) {
       }
       else if(/[0-9]/.test(state.firstNumber) ) {
         state.operator = x
-        display.textContent += ` ${x} `
+        display.textContent += ` ${x}`
       }
     }
     // We already have an state.operator
@@ -113,8 +116,10 @@ function handleBackspace(e) {
   if(!state.operator) prop = "firstNumber"
   else if (state.firstNumber && !state.secondNumber) prop = "operator"
 
-  state[prop] = state[prop].slice(0, state[prop].length -1)
-  display.textContent = display.textContent.slice(0, display.textContent.length - 1)
+  state[prop] = state[prop].slice(0, state[prop].length - 1)
+  do {
+    display.textContent = display.textContent.slice(0, display.textContent.length - 1)
+  } while (display.textContent.charAt(display.textContent.length - 1) === ' ')
 }
 
 function handleDot() {
