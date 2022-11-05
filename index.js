@@ -3,13 +3,17 @@
 /* DOM ELEMENTS */
 const display = document.querySelector('.display')
 const buttons = document.querySelectorAll('.op')
-const clearButton = document.querySelector('#clear')
-const equalsButton = document.querySelector('#equals')
+const dot = document.querySelector('#dot')
+const clear = document.querySelector('#clear')
+const backspace = document.querySelector('#backspace')
+const equals = document.querySelector('#equals')
 
 /* SET UP EVENT LISTENERS */
-equalsButton.onclick = handleEquals
-clearButton.onclick = handleClearButton
 buttons.forEach(button => button.addEventListener('click', handleInput) )
+dot.onclick = handleDot
+clear.onclick = handleClear
+backspace.onclick = handleBackspace
+equals.onclick = handleEquals
 
 /* MATHS FUNCTIONS */
 const add = (x, y) => x + y
@@ -97,9 +101,17 @@ function handleEquals(e) {
   display.textContent = firstNumber
 }
 
-function handleClearButton() {
+function handleClear() {
   operator = null
   firstNumber = ""
   secondNumber = ""
   display.textContent = ""
+}
+
+function handleBackspace() {
+
+}
+
+function handleDot() {
+  
 }
