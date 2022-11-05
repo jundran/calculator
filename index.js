@@ -11,7 +11,7 @@ const equals = document.querySelector('#equals')
 /* SET UP EVENT LISTENERS */
 buttons.forEach(button => button.addEventListener('click', handleInput) )
 dot.onclick = handleDot
-clear.onclick = handleClear
+clear.onclick = clearState
 backspace.onclick = handleBackspace
 equals.onclick = handleEquals
 
@@ -23,12 +23,14 @@ const divide = (x, y) => x / y
 const isNumber = x => !isNaN(x)
 
 /* STATE VARIABLES */
-let operator
-let firstNumber = ""
-let secondNumber = ""
+const state = {
+  operator: null,
+  firstNumber: "",
+  secondNumber: ""
+}
 
 function operate(operator, x, y) {
-  console.log(firstNumber, operator, secondNumber)
+  console.log(x, operator, y)
   if(operator === '+') return add(x,y)
   else if(operator === '-') return subtract(x,y)
   else if(operator === '*') return multiply(x,y)
@@ -36,10 +38,21 @@ function operate(operator, x, y) {
 }
 
 function clearState() {
-  firstNumber = ""
-  secondNumber = ""
-  operator = ""
+  state.firstNumber = ""
+  state.secondNumber = ""
+  state.operator = null
   display.textContent = ""
+}
+
+function handleBackspace(e) {
+  const x = e.target.textContent
+  let prop = "secondNumber"
+  if(!state.operator) prop = "firstNumber"
+  else if (state.firstNumber && !state.secondNumber) prop = "operator"
+
+  state[prop] = state[prop].toString() // slice won't work on numbers
+  state[prop] = state[prop].slice(0, state[prop].length -1)
+  display.textContent = display.textContent.slice(0, display.textContent.length - 1)
 }
 
 function handleInput(e) {
@@ -49,37 +62,37 @@ function handleInput(e) {
   else processOperator(x)
 
   function processNumber(num) {
-    operator ? secondNumber += num : firstNumber += num
+    state.operator ? state.secondNumber += num : state.firstNumber += num
     display.textContent += num
   }
 
   function processOperator(op) {
-    // We don't have an operator saved yet
-    if(!operator) {
+    // We don't have an state.operator saved yet
+    if(!state.operator) {
       // Allow negative prefix before firstNumber
-      if(!firstNumber && x === '-') {
-        firstNumber = x
+      if(!state.firstNumber && x === '-') {
+        state.firstNumber = x
         return display.textContent = x
       }
-      else if(/[0-9]/.test(firstNumber) ) {
-        operator = x
+      else if(/[0-9]/.test(state.firstNumber) ) {
+        state.operator = x
         display.textContent += ` ${x} `
       }
     }
-    // We already have an operator
+    // We already have an state.operator
     else {
       // Allow negative prefix before secondNumber
-      if(!secondNumber && x === '-') {
-        secondNumber = x
+      if(!state.secondNumber && x === '-') {
+        state.secondNumber = x
         return display.textContent += x
       }
-      else if(/[0-9]/.test(secondNumber) ) {
+      else if(/[0-9]/.test(state.secondNumber) ) {
         // Do the calculation and save it to firstNumber
-        firstNumber = operate(operator, +firstNumber, +secondNumber)
-        // Then store the latest operator and wipe the secondNumber
-        operator = x
-        secondNumber = ""
-        display.textContent = `${firstNumber} ${operator} `
+        state.firstNumber = operate(state.operator, +state.firstNumber, +state.secondNumber)
+        // Then store the latest state.operator and wipe the secondNumber
+        state.operator = x
+        state.secondNumber = ""
+        display.textContent = `${state.firstNumber} ${state.operator} `
       }
     }
   }
@@ -88,31 +101,20 @@ function handleInput(e) {
     if (display.textContent === 'Cannot divide by zero') {
       clearState()
     }
-    else if (x === '0' && operator === '/') {
+    else if (x === '0' && state.operator === '/') {
       display.textContent = 'Cannot divide by zero'
     }
   }
 }
 
 function handleEquals(e) {
-  if(!secondNumber || secondNumber === "-") return
+  if(!state.secondNumber || state.secondNumber === "-") return
 
   // Do the calculation and save it as firstNumber to allow the user to continue from the result
-  firstNumber = operate(operator, +firstNumber, +secondNumber)
-  operator = null
-  secondNumber = ""
-  display.textContent = firstNumber
-}
-
-function handleClear() {
-  operator = null
-  firstNumber = ""
-  secondNumber = ""
-  display.textContent = ""
-}
-
-function handleBackspace() {
-
+  state.firstNumber = operate(state.operator, +state.firstNumber, +state.secondNumber)
+  state.operator = null
+  state.secondNumber = ""
+  display.textContent = state.firstNumber
 }
 
 function handleDot() {
