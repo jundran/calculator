@@ -45,12 +45,7 @@ const state = {
 
 function operate(operator, x, y) {
   console.log(x, operator, y)
-  
-  if (state.secondNumber === '0' && state.operator === '/') {
-    return display.textContent = 'Cannot divide by zero'
-  }
-  
-    if(operator === '+') return add(x,y)
+  if(operator === '+') return add(x,y)
   else if(operator === '-') return subtract(x,y)
   else if(operator === '*') return multiply(x,y)
   else if(operator === '/') return divide(x,y)
@@ -64,7 +59,7 @@ function clearState() {
 }
 
 function handleInput(x) {
-  if (display.textContent === 'Cannot divide by zero') clearState()
+  if (!state.firstNumber) clearState()
   if (isNumber(x)) processNumber(x)
   else processOperator(x)
 
@@ -92,26 +87,30 @@ function handleInput(x) {
       }
     }
     else {
-      if(!state.secondNumber && x === '-') {
-        applyNegativePrefix('secondNumber')
-      }
-      else if(/[0-9]/.test(state.secondNumber) ) {
-        state.firstNumber = operate(state.operator, +state.firstNumber, +state.secondNumber)
-        state.operator = x
-        state.secondNumber = ""
-        display.textContent = `${state.firstNumber} ${state.operator} `
-      }
+      if(!state.secondNumber && x === '-') applyNegativePrefix('secondNumber')
+      else if(/[0-9]/.test(state.secondNumber) ) calculateAndDisplayResult(x)
     }
   }
 }
 
-function handleEquals() {
-  if(!state.secondNumber || state.secondNumber === "-") return
+function calculateAndDisplayResult(printOperator) {
+  if (state.secondNumber === '0' && state.operator === '/') {
+    clearState()
+    return display.textContent = 'Cannot divide by zero'
+  }
+
   // Save result to first number in order to continue with further calculations
   state.firstNumber = operate(state.operator, +state.firstNumber, +state.secondNumber)
-  state.operator = null
+  state.operator = printOperator || null
   state.secondNumber = ""
   display.textContent = state.firstNumber
+  if(printOperator) display.textContent += ` ${state.operator} `
+  if(state.firstNumber === Infinity) state.firstNumber = ""
+}
+
+function handleEquals() {
+  if(!state.secondNumber || state.secondNumber === "-") return
+  calculateAndDisplayResult()
 }
 
 function handleBackspace() {
