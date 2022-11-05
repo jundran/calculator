@@ -19,11 +19,15 @@ document.addEventListener('keypress', e => {
   const input = getInputFromKeyPress(e)
   if(input) handleInput(input)
 })
+
 document.addEventListener('keydown', e => {
   if(e.code === 'Enter' || e.code === 'NumpadEnter') {
     // Prevent Enter || NumpadEnter from triggering last button pressed with mouse
     e.preventDefault()
     handleEquals()
+  }
+  else if(e.code === 'Backspace' || e.code === 'Delete') {
+    handleBackspace()
   }
 })
 
@@ -144,10 +148,6 @@ function getInputFromKeyPress(e) {
   }
   else if(c === '=') {
     handleEquals()
-    return null
-  }
-  else if(c === 'Backspace' || c === 'Delete') {
-    handleBackspace()
     return null
   }
   else if(c === 'c' || c === 'C') {
