@@ -30,11 +30,12 @@ const state = {
 }
 
 function operate(operator, x, y) {
+  // Return as string because some functions use slice
   console.log(x, operator, y)
-  if(operator === '+') return add(x,y)
-  else if(operator === '-') return subtract(x,y)
-  else if(operator === '*') return multiply(x,y)
-  else if(operator === '/') return divide(x,y)
+  if(operator === '+') return add(x,y).toString()
+  else if(operator === '-') return subtract(x,y).toString()
+  else if(operator === '*') return multiply(x,y).toString()
+  else if(operator === '/') return divide(x,y).toString()
 }
 
 function clearState() {
@@ -42,17 +43,6 @@ function clearState() {
   state.secondNumber = ""
   state.operator = null
   display.textContent = ""
-}
-
-function handleBackspace(e) {
-  const x = e.target.textContent
-  let prop = "secondNumber"
-  if(!state.operator) prop = "firstNumber"
-  else if (state.firstNumber && !state.secondNumber) prop = "operator"
-
-  state[prop] = state[prop].toString() // slice won't work on numbers
-  state[prop] = state[prop].slice(0, state[prop].length -1)
-  display.textContent = display.textContent.slice(0, display.textContent.length - 1)
 }
 
 function handleInput(e) {
@@ -117,6 +107,24 @@ function handleEquals(e) {
   display.textContent = state.firstNumber
 }
 
+function handleBackspace(e) {
+  const x = e.target.textContent
+  let prop = "secondNumber"
+  if(!state.operator) prop = "firstNumber"
+  else if (state.firstNumber && !state.secondNumber) prop = "operator"
+
+  state[prop] = state[prop].slice(0, state[prop].length -1)
+  display.textContent = display.textContent.slice(0, display.textContent.length - 1)
+}
+
 function handleDot() {
+  let prop = "secondNumber"
+  if(!state.operator) prop = "firstNumber"
+  if(state[prop].includes('.')) return
   
+  let dot
+  if(!state[prop]) dot = '0.'
+  else dot = '.'
+  state[prop] += dot
+  display.textContent = display.textContent += dot
 }
