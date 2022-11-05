@@ -13,11 +13,18 @@ equals.onclick = handleEquals
 buttons.forEach(button =>
   button.addEventListener('click', e => handleInput(e.target.textContent)))
 
-// Keypress ignores shift but doesn't detect backspace or delete
-document.addEventListener('keydown', e => {
-  const input = getInputFromKeyCode(e)
-  console.log(input)
+// Keypress does not interfere with shift and Fkeys (ie. F12 for dev tools)
+// but also ignores backspace and delete so need to also listen for keydown
+document.addEventListener('keypress', e => {
+  const input = getInputFromKeyPress(e)
   if(input) handleInput(input)
+})
+document.addEventListener('keydown', e => {
+  if(e.code === 'Enter' || e.code === 'NumpadEnter') {
+    // Prevent Enter || NumpadEnter from triggering last button pressed with mouse
+    e.preventDefault()
+    handleEquals()
+  }
 })
 
 const add = (x, y) => x + y
@@ -127,17 +134,16 @@ function handleDot() {
   display.textContent = display.textContent += dot
 }
 
-function getInputFromKeyCode(e) {
-  e.preventDefault() // prevent enter key from slecting number if in focus
+function getInputFromKeyPress(e) {
   const c = e.key
   if(/^\d$/.test(c)) return c
   else if(['+', '-', '*', '/', '\\'].includes(c)) return c
-  else if(c === '=' || e.code === 'Enter' || e.code === 'NumpadEnter') {
-    handleEquals()
-    return null
-  }
   else if(c === '.') {
     handleDot()
+    return null
+  }
+  else if(c === '=') {
+    handleEquals()
     return null
   }
   else if(c === 'Backspace' || c === 'Delete') {
