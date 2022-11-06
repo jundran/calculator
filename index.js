@@ -50,7 +50,7 @@ function operate(operator, x, y) {
   else if(operator === '-') answer = subtract(x,y)
   else if(operator === '*') answer = multiply(x,y)
   else if(operator === '/') answer = divide(x,y)
-  return Number.parseFloat(answer.toFixed(16))
+  return Number.parseFloat(answer.toFixed(16)).toString()
 }
 
 function clearState() {
@@ -117,9 +117,7 @@ function handleBackspace() {
   if(!state.operator) prop = "firstNumber"
   else if (state.firstNumber && !state.secondNumber) prop = "operator"
 
-  state[prop] = "" + state[prop]
   state[prop] = state[prop].slice(0, state[prop].length - 1)
-
   display.textContent = display.textContent.trim()
   display.textContent = display.textContent.slice(0, display.textContent.length - 1)
   display.textContent = display.textContent.trim()
